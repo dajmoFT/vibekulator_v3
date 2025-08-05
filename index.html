@@ -1,128 +1,112 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vaporwave Calculator</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vaporwave Kalkulator</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: 'Courier New', monospace;
-      background-color: black;
-      color: white;
-      margin: 0;
-      overflow: hidden;
+      font-family: 'VT323', monospace;
     }
-
     #bg-grid {
       position: fixed;
-      inset: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       z-index: -1;
-      background: url('./background_gif.gif') center/cover no-repeat;
-      opacity: 0.25;
-      filter: blur(2px);
+      background: linear-gradient(#000000 2px, transparent 2px), linear-gradient(to right, #000000 2px, transparent 2px);
+      background-size: 20px 20px;
+      opacity: 0.05;
     }
-
-    .input-bar {
-      background-color: #2d2d2d;
-      border-radius: 9999px;
-      padding: 0.75rem 1rem;
-      outline: none;
+    .btn {
+      background-color: #1f1f1f;
       color: white;
-      width: 100%;
+      font-size: 1.5rem;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid #555;
     }
-
-    .input-bar::placeholder {
+    .btn:hover {
+      background-color: #333;
+    }
+    input::placeholder {
       color: #aaa;
     }
-
-    canvas {
-      border-radius: 1rem;
-    }
-
-    .btn {
-      background-color: #333;
-      border-radius: 0.5rem;
-      padding: 0.75rem;
-      text-align: center;
-      font-size: 1.25rem;
-      transition: background 0.2s;
-    }
-
-    .btn:hover {
-      background-color: #555;
-    }
-
-    .spotify-player {
-      font-size: 0.875rem;
+    .spotify-player button {
+      font-family: monospace;
     }
   </style>
 </head>
-<body>
+<body class="bg-black text-white p-4">
+
+  <!-- Tło -->
   <div id="bg-grid"></div>
 
-  <div class="flex flex-col h-screen justify-between p-6">
-    <!-- Główna zawartość -->
-    <div class="flex-grow flex justify-center gap-6">
-      <!-- Kalkulator -->
-      <div class="w-[40%] flex flex-col gap-4 justify-center">
-        <!-- Pasek wyniku -->
-        <div id="display" class="input-bar text-green-400 text-3xl">0</div>
+  <!-- NAGŁÓWEK -->
+  <header class="w-full text-center text-white text-2xl font-mono py-4">
+    made by Marcin Rybak no license required
+  </header>
 
-        <!-- Klawiatura -->
-        <div class="grid grid-cols-4 gap-2 text-white">
-          <button class="btn">7</button>
-          <button class="btn">8</button>
-          <button class="btn">9</button>
-          <button class="btn">/</button>
+  <!-- GŁÓWNA ZAWARTOŚĆ -->
+  <div class="flex-grow flex justify-center gap-6 mt-4">
 
-          <button class="btn">4</button>
-          <button class="btn">5</button>
-          <button class="btn">6</button>
-          <button class="btn">*</button>
+    <!-- LEWA STRONA: Kalkulator -->
+    <div class="w-[30%] flex flex-col items-center gap-4">
+      <div id="display" class="w-full text-left text-green-400 text-3xl bg-[#2d2d2d] px-4 py-2 rounded-full">0</div>
 
-          <button class="btn">1</button>
-          <button class="btn">2</button>
-          <button class="btn">3</button>
-          <button class="btn">-</button>
+      <div class="grid grid-cols-4 gap-2 w-full">
+        <button class="btn">7</button>
+        <button class="btn">8</button>
+        <button class="btn">9</button>
+        <button class="btn">/</button>
 
-          <button class="btn">0</button>
-          <button class="btn">.</button>
-          <button class="btn">=</button>
-          <button class="btn">+</button>
+        <button class="btn">4</button>
+        <button class="btn">5</button>
+        <button class="btn">6</button>
+        <button class="btn">*</button>
 
-          <button class="btn">C</button>
-          <button class="btn">^</button>
-          <button class="btn">(</button>
-          <button class="btn">)</button>
-        </div>
+        <button class="btn">1</button>
+        <button class="btn">2</button>
+        <button class="btn">3</button>
+        <button class="btn">-</button>
 
-        <!-- Pasek do wpisywania funkcji -->
-        <input id="functionInput" type="text" class="input-bar text-white" placeholder="enter function" />
+        <button class="btn">0</button>
+        <button class="btn">.</button>
+        <button class="btn">+</button>
+        <button class="btn">=</button>
+
+        <button class="btn">C</button>
+        <button class="btn">^</button>
+        <button class="btn">%</button>
+        <button class="btn">√</button>
       </div>
 
-      <!-- Wykres -->
-      <div class="w-[30%] aspect-square">
-        <canvas id="graphCanvas" class="bg-black w-full h-full"></canvas>
-      </div>
+      <input id="functionInput" type="text" class="w-full bg-[#2d2d2d] text-white px-4 py-2 rounded-full" placeholder="enter function" />
     </div>
 
-    <!-- Pasek muzyki -->
-    <div class="fixed bottom-2 left-1/2 -translate-x-1/2 w-1/2 bg-black bg-opacity-80 px-4 py-2 flex items-center justify-between rounded-full spotify-player border border-white">
-      <div class="flex gap-4 items-center">
-        <button onclick="prevTrack()"><<</button>
-        <button onclick="toggleMute()" id="muteBtn">mute</button>
-      </div>
-      <marquee class="text-white w-full text-center mx-4" id="trackTitle">Loading track...</marquee>
-      <button onclick="nextTrack()">>></button>
+    <!-- PRAWA STRONA: Wykres -->
+    <div class="w-[30%] h-[30vh]">
+      <canvas id="graphCanvas" class="bg-black w-full h-full rounded-xl"></canvas>
     </div>
   </div>
 
+  <!-- ODTWARZACZ -->
+  <div class="fixed bottom-2 left-1/2 -translate-x-1/2 w-2/3 bg-black bg-opacity-80 px-4 py-2 flex items-center justify-between rounded-full spotify-player border border-white text-white">
+    <div class="flex items-center gap-4">
+      <button id="toggleMuteBtn" onclick="toggleMute()">volume</button>
+      <button onclick="prevTrack()">&lt;&lt;</button>
+    </div>
+    <marquee behavior="scroll" direction="left" class="text-white text-sm text-center flex-1 px-4" id="trackTitle">Loading track...</marquee>
+    <button onclick="nextTrack()">&gt;&gt;</button>
+  </div>
+
+  <!-- YT IFRAME -->
+  <iframe id="yt-iframe" style="display:none;" allow="autoplay"></iframe>
+
   <script>
+    // Kalkulator
     const display = document.getElementById('display');
     const buttons = document.querySelectorAll('.btn');
-    const functionInput = document.getElementById('functionInput');
     let input = '';
 
     buttons.forEach(btn => {
@@ -131,10 +115,12 @@
         if (val === 'C') input = '';
         else if (val === '=') {
           try {
-            input = eval(input).toString();
+            input = eval(input.replaceAll('^', '**')).toString();
           } catch {
             input = 'ERROR';
           }
+        } else if (val === '√') {
+          input = Math.sqrt(parseFloat(input)).toString();
         } else {
           input += val;
         }
@@ -142,24 +128,11 @@
       });
     });
 
-    // Funkcja do poprawiania mnożenia (np. 2x → 2*x)
-    function insertMultiplication(str) {
-      return str.replace(/(\d)([a-zA-Z])/g, '$1*$2')
-                .replace(/([a-zA-Z])(\d)/g, '$1*$2')
-                .replace(/([a-zA-Z])([a-zA-Z])/g, '$1*$2');
-    }
-
-    // Canvas + math.js do funkcji
+    // Wykres
     const canvas = document.getElementById('graphCanvas');
     const ctx = canvas.getContext('2d');
-
-    function resizeCanvas() {
-      canvas.width = canvas.clientWidth;
-      canvas.height = canvas.clientHeight;
-    }
-
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
 
     function drawAxes() {
       ctx.strokeStyle = 'white';
@@ -170,90 +143,65 @@
       ctx.moveTo(canvas.width / 2, 0);
       ctx.lineTo(canvas.width / 2, canvas.height);
       ctx.stroke();
-
-      ctx.fillStyle = 'white';
-      ctx.font = '12px monospace';
-      ctx.fillText('x', canvas.width - 10, canvas.height / 2 - 5);
-      ctx.fillText('y', canvas.width / 2 + 5, 10);
     }
 
     function drawFunction(expr) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawAxes();
-
-      const scope = {};
+      const step = 1;
+      const scale = 20;
       ctx.beginPath();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = ['#00ffff', '#ff00ff', '#00ff00', '#ffff00'][Math.floor(Math.random() * 4)];
-
-      for (let x = -canvas.width / 2; x < canvas.width / 2; x++) {
-        scope.x = x / 20;
+      for (let x = -canvas.width / 2; x < canvas.width / 2; x += step) {
         try {
-          scope.y = math.evaluate(expr, scope);
-          const px = canvas.width / 2 + x;
-          const py = canvas.height / 2 - scope.y * 20;
-          if (x === -canvas.width / 2) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
-        } catch {
-          continue;
-        }
+          const xVal = x / scale;
+          const yVal = evaluateExpression(expr.replaceAll('x', `(${xVal})`));
+          const screenX = canvas.width / 2 + x;
+          const screenY = canvas.height / 2 - yVal * scale;
+          if (x === -canvas.width / 2) ctx.moveTo(screenX, screenY);
+          else ctx.lineTo(screenX, screenY);
+        } catch {}
       }
-
+      ctx.strokeStyle = '#00ffff';
+      ctx.lineWidth = 2;
       ctx.stroke();
     }
 
-    function renderDefaultMessage() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = 'white';
-      ctx.font = '16px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('enter a linear function', canvas.width / 2, canvas.height / 2);
+    function evaluateExpression(expr) {
+      // Prostym parserem wyrażenia matematycznego
+      return Function('"use strict";return (' + expr + ')')();
+    }
+
+    function parseInput(input) {
+      input = input.replace(/\s+/g, '').toLowerCase().replace(/([0-9])x/g, '$1*x');
+      if (!input.includes('=')) return null;
+      const [lhs, rhs] = input.split('=');
+      if (lhs.includes('y')) return rhs;
+      if (rhs.includes('y')) return lhs;
+      return null;
     }
 
     functionInput.addEventListener('input', () => {
-      const raw = functionInput.value.trim().toLowerCase();
-      if (!raw) {
-        renderDefaultMessage();
-        return;
-      }
-
-      const expr = insertMultiplication(raw);
-      try {
-        drawFunction(expr);
-      } catch {
-        renderDefaultMessage();
-      }
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawAxes();
+      const expr = parseInput(functionInput.value);
+      if (expr) drawFunction(expr);
     });
 
-    window.addEventListener('load', renderDefaultMessage);
+    drawAxes();
 
-    // YouTube player logic (simulate autoplay)
+    // Odtwarzacz
     const tracks = [
-      {
-        title: 'Vaporwave 1 Hour',
-        embed: 'https://www.youtube.com/embed/4xDzrJKXOOY?autoplay=1'
-      },
-      {
-        title: 'Lo-Fi Chill Vaporwave Mix',
-        embed: 'https://www.youtube.com/embed/f02mOEt11OQ?autoplay=1'
-      }
+      { title: "vaporwave tape 1", embed: "https://www.youtube.com/embed/4xDzrJKXOOY?autoplay=1&mute=0" },
+      { title: "vaporwave mix", embed: "https://www.youtube.com/embed/f02mOEt11OQ?autoplay=1&mute=0" }
     ];
-
-    let currentTrack = 0;
+    let currentTrack = Math.floor(Math.random() * tracks.length);
     let muted = false;
 
     function loadTrack() {
-      document.getElementById('trackTitle').textContent = tracks[currentTrack].title;
-      let iframe = document.getElementById('yt-iframe');
-      if (!iframe) {
-        iframe = document.createElement('iframe');
-        iframe.id = 'yt-iframe';
-        iframe.style.display = 'none';
-        iframe.allow = 'autoplay';
-        document.body.appendChild(iframe);
-      }
-      const muteParam = muted ? 'mute=1' : 'mute=0';
-      iframe.src = tracks[currentTrack].embed + '&' + muteParam;
+      const iframe = document.getElementById('yt-iframe');
+      const track = tracks[currentTrack];
+      const src = track.embed.replace(/mute=(0|1)/, `mute=${muted ? 1 : 0}`);
+      iframe.src = src;
+      document.getElementById('trackTitle').textContent = track.title;
+      document.getElementById('toggleMuteBtn').textContent = muted ? 'volume' : 'mute';
     }
 
     function nextTrack() {
@@ -268,7 +216,6 @@
 
     function toggleMute() {
       muted = !muted;
-      document.getElementById('muteBtn').textContent = muted ? 'volume' : 'mute';
       loadTrack();
     }
 
